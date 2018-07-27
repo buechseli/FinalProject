@@ -32,29 +32,43 @@ var chartGroup = svg.append("g")
 
 var parseTime = d3.timeParse("%Y");
 
-
 d3.json("./country_info.json", function(error, countryData) {
    if (error) throw error; 
-   console.log(countryData[0]);
-   console.log("Country Name :", countryData[0]['country_name']);
-   console.log("Total Arrivals :", countryData[0]['arrivals']['total']);
-   console.log("Total Departures :", countryData[0]['departures']['total']);
-   console.log("Total Inbound Tourism Spend :", countryData[0]['expenditure_in_country']);
-   console.log("Total Outbound Tourism Spend :", countryData[0]['expenditure_out_country']);
-   console.log("Years :", countryData[0]['years'])
-
+   console.log(countryData);
+   console.log("Country Name :", countryData[1]['country_name']);
+   console.log("Total Arrivals :", countryData[1]['arrivals']['total']);
+   console.log("Total Departures :", countryData[1]['departures']['total']);
+   console.log("Total Inbound Tourism Spend :", countryData[1]['expenditure_in_country']);
+   console.log("Total Outbound Tourism Spend :", countryData[1]['expenditure_out_country']);
+   console.log("Years :", countryData[1]['years'])
   // Step 4: Parse the data
 
   // Format the data
-  countryData.forEach(function(data) {
-    data.arrivals.total = +data.arrivals.total;
-    data.departures.total = +data.departures.total;
-  });
+for (var i=0; i < countryData.length; i++){
+    var name =countryData[i].country_name;
+    console.log(name)
+    var total_arrival = countryData[i].arrivals.total;
+    console.log(total_arrival)
+    //countryData[i].forEach(function(data){
+    //  data.years = +parseTime(data.years);
+    //  data.country_name = +data.country_name;
+    //  data.arrivals.total = +data.arrivals.total;
+    //  data.departures.total = +data.departures.total;
+    //  data.expenditure_in_country= +data.expenditure_in_country;
+    //  data.expenditure_out_country= +data.expenditure_out_country
+    //});
+  }
+
+  //countryData.forEach(function(data, i) {
+    //data[i].years = parseTime(data[i].years);
+    //data[i].arrivals.total = +data[i].arrivals.total;
+    //data[i].departures.total = +data[i].departures.total;
+  //});
 
   // Step 5: Create the scales for the chart
   // =================================
   var xTimeScale = d3.scaleTime()
-    .domain(d3.extent(year_axis))
+    .domain(d3.extent(countryData, d=> d.years))
     .range([0, width]);
 
   var yLinearScale = d3.scaleLinear().range([height, 0]);
