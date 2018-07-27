@@ -29,6 +29,10 @@ var chartGroup = svg.append("g")
 // Step 3:
 // Import data from the country_info.json file
 // =================================
+
+var parseTime = d3.timeParse("%Y");
+
+
 d3.json("./country_info.json", function(error, countryData) {
    if (error) throw error; 
    console.log(countryData[0]);
@@ -36,18 +40,21 @@ d3.json("./country_info.json", function(error, countryData) {
    console.log("Total Arrivals :", countryData[0]['arrivals']['total']);
    console.log("Total Departures :", countryData[0]['departures']['total']);
    console.log("Total Inbound Tourism Spend :", countryData[0]['expenditure_in_country']);
+   console.log("Total Outbound Tourism Spend :", countryData[0]['expenditure_out_country']);
+   console.log("Years :", countryData[0]['years'])
 
   // Step 4: Parse the data
 
   // Format the data
   countryData.forEach(function(data) {
     data.arrivals.total = +data.arrivals.total;
+    data.departures.total = +data.departures.total;
   });
 
   // Step 5: Create the scales for the chart
   // =================================
   var xTimeScale = d3.scaleTime()
-    .domain(d3.extent(countryData, d => d.date))
+    .domain(d3.extent(year_axis))
     .range([0, width]);
 
   var yLinearScale = d3.scaleLinear().range([height, 0]);
@@ -55,21 +62,21 @@ d3.json("./country_info.json", function(error, countryData) {
   // Step 6: Set up the y-axis domain
   // ==============================================
   // @NEW! determine the max y value
-  // find the max of the morning data
-  var morningMax = d3.max(countryData, d => d.morning);
+  // find the max of the arrivals data
+  var arrivalMax = d3.max(countryData, d => d.arrivals.total);
 
   // find the max of the evening data
-  var eveningMax = d3.max(countryData, d => d.evening);
+  var departureMax= d3.max(countryData, d => d.departures.total);
 
   var yMax;
-  if (morningMax > eveningMax) {
-    yMax = morningMax;
+  if (arrivalMax> departureMax) {
+    yMax = arrivalMax;
   }
   else {
-    yMax = eveningMax;
+    yMax = departureMax;
   }
 
-  // var yMax = morningMax > eveningMax ? morningMax : eveningMax;
+  // var yMax = arrivalMax> departureMax? arrivalMax: departureMax;
 
   // Use the yMax value to set the yLinearScale domain
   yLinearScale.domain([0, yMax]);
@@ -77,7 +84,7 @@ d3.json("./country_info.json", function(error, countryData) {
 
   // Step 7: Create the axes
   // =================================
-  var bottomAxis = d3.axisBottom(xTimeScale).tickFormat(d3.timeFormat("%d-%b"));
+  var bottomAxis = d3.axisBottom(xTimeScale).tickFormat(d3.timeFormat("%Y"));
   var leftAxis = d3.axisLeft(yLinearScale);
 
   // Step 8: Append the axes to the chartGroup
@@ -93,20 +100,20 @@ d3.json("./country_info.json", function(error, countryData) {
   // Step 9: Set up two line generators and append two SVG paths
   // ==============================================
 
-  // Line generator for morning data
+  // Line generator for arrivals data
   var line1 = d3.line()
-    .x(d => xTimeScale(d.date))
-    .y(d => yLinearScale(d.morning));
+    .x(d => xTimeScale(year_axis))
+    .y(d => yLinearScale(d.arrivals.total));
 
   // Line generator for evening data
   var line2 = d3.line()
-    .x(d => xTimeScale(d.date))
-    .y(d => yLinearScale(d.evening));
+    .x(d => xTimeScale(year_axis))
+    .y(d => yLinearScale(d.departures.total));
 
   // Append a path for line1
   chartGroup
     .append("path")
-    .attr("d", line1(countryData))
+    .attr("d", line1)
     .classed("line green", true);
 
   // Append a path for line2
