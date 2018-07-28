@@ -35,38 +35,60 @@ var parseTime = d3.timeParse("%Y");
 d3.json("./country_info.json", function(error, countryData) {
    if (error) throw error; 
    console.log(countryData);
-   console.log("Country Name :", countryData[1]['country_name']);
-   console.log("Total Arrivals :", countryData[1]['arrivals']['total']);
-   console.log("Total Departures :", countryData[1]['departures']['total']);
-   console.log("Total Inbound Tourism Spend :", countryData[1]['expenditure_in_country']);
-   console.log("Total Outbound Tourism Spend :", countryData[1]['expenditure_out_country']);
-   console.log("Years :", countryData[1]['years'])
+   console.log("Total Arrivals :", countryData['ALBANIA'][0]['arrivals_total']);
+   console.log("Countries: ", d3.keys(countryData))
   // Step 4: Parse the data
 
   // Format the data
-for (var i=0; i < countryData.length; i++){
-    var name =countryData[i].country_name;
-    console.log(name)
-    var total_arrival = countryData[i].arrivals.total;
-    console.log(total_arrival)
-    //countryData[i].forEach(function(data){
-    //  data.years = +parseTime(data.years);
-    //  data.country_name = +data.country_name;
-    //  data.arrivals.total = +data.arrivals.total;
-    //  data.departures.total = +data.departures.total;
-    //  data.expenditure_in_country= +data.expenditure_in_country;
-    //  data.expenditure_out_country= +data.expenditure_out_country
-    //});
+
+  //all the countries (there should be 217 countries)
+  var country_name=d3.keys(countryData);
+  console.log(country_name[1]);
+  console.log("Albania Total Arrivals", countryData[country_name[1]][0].arrivals_total);
+
+  //keys for each dictionary in country array (should be 11 keys, per dict)
+  var country_keys = d3.keys(countryData[country_name[1]][0]);
+  console.log(country_keys);
+
+  //length of array for each country (should be 20, 1995-2014)
+  var country_array = countryData[country_name[1]].length;
+  console.log(country_array);
+  
+  //testing for loop
+  //for (var i =0; i<country_name.length; i++){
+    //console.log("country index"+i);
+    //for (var j=0; j<country_array; j++){
+      console.log("year index"+j);
+      //var total_arrivals_yr_cntry = countryData[country_name[i]][j].arrivals_total;
+      //console.log("Country:", country_name[i]);
+      //console.log("total arrivals per year :", total_arrivals_yr_cntry);
+    //}
+  //}  
+  
+  //actually formatting the data
+  for (var i=0; i<country_name.length; i++){
+    for(var j=0; j<country_array; j++){
+      countryData[country_name[i]][j].arrivals_total = +countryData[country_name[i]][j].arrivals_total;
+      countryData[country_name[i]][j].departures_total = +countryData[country_name[i]][j].departures_total;
+      countryData[country_name[i]][j].expenditure_in_country = +countryData[country_name[i]][j].expenditure_in_country;
+      countryData[country_name[i]][j].expenditure_out_country = +countryData[country_name[i]][j].expenditure_out_country;
+      countryData[country_name[i]][j].date = +parseTime(countryData[country_name[i]][j].date);
+    }
   }
-
-  //countryData.forEach(function(data, i) {
-    //data[i].years = parseTime(data[i].years);
-    //data[i].arrivals.total = +data[i].arrivals.total;
-    //data[i].departures.total = +data[i].departures.total;
-  //});
-
+ 
   // Step 5: Create the scales for the chart
   // =================================
+  
+  //create years_list
+
+  
+  for(var j=0; j<country_array; j++){
+     var years_list = countryData[country_name[1]][j].date;
+     console.log(years_list);
+   }
+  
+  
+
   var xTimeScale = d3.scaleTime()
     .domain(d3.extent(countryData, d=> d.years))
     .range([0, width]);
