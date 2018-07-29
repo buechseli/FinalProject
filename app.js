@@ -34,34 +34,35 @@ var parseTime = d3.timeParse("%Y");
 
 d3.json("./country_info.json", function(error, countryData) {
    if (error) throw error; 
-   console.log(countryData);
-   console.log("Total Arrivals :", countryData['ALBANIA'][0]['arrivals_total']);
-   console.log("Countries: ", d3.keys(countryData))
+   // console.log(countryData);
+   // console.log("Total Arrivals :", countryData['ALBANIA'][0]['arrivals_total']);
+   // console.log("Countries: ", d3.keys(countryData))
   // Step 4: Parse the data
 
   // Format the data
 
   //all the countries (there should be 217 countries)
   var country_name=d3.keys(countryData);
-  console.log(country_name[1]);
-  console.log("Albania Total Arrivals", countryData[country_name[1]][0].arrivals_total);
+  // console.log(country_name[1]);
+  // console.log("Albania Total Arrivals", countryData[country_name[1]][0].arrivals_total);
+  // console.log("Albania Year 1", countryData[country_name[1]][0].date);
 
   //keys for each dictionary in country array (should be 11 keys, per dict)
   var country_keys = d3.keys(countryData[country_name[1]][0]);
-  console.log(country_keys);
+  // console.log(country_keys);
 
   //length of array for each country (should be 20, 1995-2014)
   var country_array = countryData[country_name[1]].length;
-  console.log(country_array);
+  // console.log(country_array);
   
   //testing for loop
   //for (var i =0; i<country_name.length; i++){
-    //console.log("country index"+i);
+    //// console.log("country index"+i);
     //for (var j=0; j<country_array; j++){
-      console.log("year index"+j);
+      //// console.log("year index"+j);
       //var total_arrivals_yr_cntry = countryData[country_name[i]][j].arrivals_total;
-      //console.log("Country:", country_name[i]);
-      //console.log("total arrivals per year :", total_arrivals_yr_cntry);
+      //// console.log("Country:", country_name[i]);
+      //// console.log("total arrivals per year :", total_arrivals_yr_cntry);
     //}
   //}  
   
@@ -75,22 +76,22 @@ d3.json("./country_info.json", function(error, countryData) {
       countryData[country_name[i]][j].date = +parseTime(countryData[country_name[i]][j].date);
     }
   }
+
+  console.log(countryData)
  
   // Step 5: Create the scales for the chart
   // =================================
   
   //create years_list
-
-  
+  var years_list =[]
   for(var j=0; j<country_array; j++){
-     var years_list = countryData[country_name[1]][j].date;
-     console.log(years_list);
-   }
-  
-  
+     years_list.push(countryData[country_name[1]][j].date);  
+    }
 
+  console.log("Year List: ", years_list);
+  
   var xTimeScale = d3.scaleTime()
-    .domain(d3.extent(countryData, d=> d.years))
+    .domain(d3.extent(years_list))
     .range([0, width]);
 
   var yLinearScale = d3.scaleLinear().range([height, 0]);
@@ -99,10 +100,29 @@ d3.json("./country_info.json", function(error, countryData) {
   // ==============================================
   // @NEW! determine the max y value
   // find the max of the arrivals data
-  var arrivalMax = d3.max(countryData, d => d.arrivals.total);
 
-  // find the max of the evening data
-  var departureMax= d3.max(countryData, d => d.departures.total);
+  //create albania arrivals list
+  var albania_arrivals_list = []
+
+  for(var j=0; j<country_array; j++){
+    albania_arrivals_list.push(countryData[country_name[1]][j].arrivals_total);
+  }
+  console.log("Total Arrivals by Year :", albania_arrivals_list) 
+
+  var arrivalMax = d3.max(albania_arrivals_list);
+  console.log("arrival max :", arrivalMax);
+
+  //create albania departures list
+  var albania_departures_list = []
+
+  for(var j=0; j<country_array; j++){
+    albania_departures_list.push(countryData[country_name[1]][j].departures_total);
+  }
+  console.log("Total Departures by Year: ", albania_departures_list);
+
+  // find the max of the departure data
+  var departureMax= d3.max(albania_departures_list);
+  console.log("departure max:", departureMax);
 
   var yMax;
   if (arrivalMax> departureMax) {
@@ -116,7 +136,6 @@ d3.json("./country_info.json", function(error, countryData) {
 
   // Use the yMax value to set the yLinearScale domain
   yLinearScale.domain([0, yMax]);
-
 
   // Step 7: Create the axes
   // =================================
@@ -136,27 +155,30 @@ d3.json("./country_info.json", function(error, countryData) {
   // Step 9: Set up two line generators and append two SVG paths
   // ==============================================
 
-  // Line generator for arrivals data
   var line1 = d3.line()
-    .x(d => xTimeScale(year_axis))
-    .y(d => yLinearScale(d.arrivals.total));
+    .x(function(d, i) { console.log(xTimeScale(d)); 
+                        return xTimeScale(d); })
+    .y(function(d, i) { console.log(yLinearScale(albania_arrivals_list[i])); 
+                        return yLinearScale(albania_arrivals_list[i]); });
 
-  // Line generator for evening data
   var line2 = d3.line()
-    .x(d => xTimeScale(year_axis))
-    .y(d => yLinearScale(d.departures.total));
-
+    .x(function(d, i) { console.log(xTimeScale(d)); 
+                        return xTimeScale(d); })
+    .y(function(d, i) { console.log(yLinearScale(albania_departures_list[i])); 
+                        return yLinearScale(albania_departures_list[i]); });
+  
   // Append a path for line1
   chartGroup
     .append("path")
+    .datum(years_list)
     .attr("d", line1)
     .classed("line green", true);
 
   // Append a path for line2
   chartGroup
-    .data([countryData])
     .append("path")
+    .datum(years_list)
     .attr("d", line2)
-    .classed("line orange", true);
+    .classed("line red", true);
 
 });
