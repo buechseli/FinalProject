@@ -1,24 +1,24 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[21]:
 
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
-from bokeh.models import CategoricalColorMapper, HoverTool, ColumnDataSource, Panel
+from bokeh.models import CategoricalColorMapper, HoverTool, ColumnDataSource, Panel, Legend
 
 
-# In[2]:
+# In[3]:
 
 
 import json
 from pprint import pprint
 
 
-# In[3]:
+# In[4]:
 
 
 with open('country_info.json') as f:
@@ -27,7 +27,7 @@ with open('country_info.json') as f:
 pprint(data)
 
 
-# In[4]:
+# In[5]:
 
 
 x_coord = []
@@ -49,7 +49,7 @@ print(y_expend_in)
 print(y_expend_out)
 
 
-# In[5]:
+# In[6]:
 
 
 country_names =[]
@@ -60,7 +60,7 @@ for key in data.keys():
 country_names
 
 
-# In[6]:
+# In[22]:
 
 
 from bokeh.plotting import figure, output_file,show
@@ -69,7 +69,7 @@ from bokeh.io import show, curdoc
 from bokeh.layouts import column, row, WidgetBox, gridplot
 
 
-# In[7]:
+# In[9]:
 
 
 #grabbing lists from "CSV_analysis.ipynb" 
@@ -90,7 +90,7 @@ arrivals_list = ['FRANCE',
  'POLAND']
 
 
-# In[8]:
+# In[10]:
 
 
 #grabbing lists from "CSV_analysis.ipynb" 
@@ -111,7 +111,7 @@ departures_list = ['HONG KONG, CHINA',
  'MALAYSIA']
 
 
-# In[9]:
+# In[11]:
 
 
 #grabbing lists from "CSV_analysis.ipynb" 
@@ -132,7 +132,7 @@ expenditure_in_list = ['UNITED STATES OF AMERICA',
  'MEXICO']
 
 
-# In[10]:
+# In[12]:
 
 
 #grabbing lists from "CSV_analysis.ipynb" 
@@ -153,7 +153,7 @@ expenditure_out_list =['UNITED STATES OF AMERICA',
  'SAUDI ARABIA']
 
 
-# In[11]:
+# In[13]:
 
 
 colors = ['pink',
@@ -173,12 +173,12 @@ colors = ['pink',
           'cadetblue']
 
 
-# In[29]:
+# In[40]:
 
 
 #Function to make the plot
 def make_chart_cds(country_cds):
-    plot = figure(title="Arrivals & Departures ('000s)")
+    plot = figure(plot_width=600, title="Arrivals & Departures ('000s)")
     plot.line(x='years', 
               y='arrivals',
               source=country_cds, 
@@ -202,7 +202,7 @@ def make_chart_cds(country_cds):
     return plot 
 
 def make_chart_exp_cds(country_cds):
-    plot2 = figure(title="Inbound & Outbound Spend ($M - USD)")
+    plot2 = figure(plot_width=600, title="Inbound & Outbound Spend ($M - USD)")
     plot2.line(x='years', 
               y='expenditures_in',
               source=country_cds, 
@@ -249,72 +249,80 @@ def select_country_handler(attr, old, new):
     return
 
 def make_arrival_chart_cds(arrivals_list):
-    plot = figure(title="Top 15 Countries by Total Arrivals ('000s)")
+    plot = figure(plot_width=900, title="Top 15 Countries by Total Arrivals ('000s)")
+    line_list =[]
     for i in range(len(arrivals_list)):
         country_cds = get_cds(arrivals_list[i])
-        plot.line(x='years', 
+        line_list.append([plot.line(x='years', 
                   y='arrivals',
                   source=country_cds, 
                   line_color=colors[i], 
                   line_width=2,
                   muted_color = colors[i],
-                  muted_alpha = 0.2,
-                  legend = arrivals_list[i])
-    plot.legend.location = 'top_left'
+                  muted_alpha = 0.2)])
+    legend_tuple_list = list(zip(arrivals_list, line_list))
+    legend = Legend(items =legend_tuple_list, location = (0,-30))
+    plot.add_layout(legend, 'right')
     plot.legend.click_policy = 'mute'
     plot.yaxis.axis_label = "Tourists ('000s)"
     plot.xaxis.axis_label = "Year"
     return plot 
 
 def make_departure_chart_cds(departures_list):
-    plot = figure(title="Top 15 Countries by Total Departures ('000s)")
+    plot = figure(plot_width=900, title="Top 15 Countries by Total Departures ('000s)")
+    line_list =[]
     for i in range(len(departures_list)):
         country_cds = get_cds(departures_list[i])
-        plot.line(x='years', 
+        line_list.append([plot.line(x='years', 
                   y='departures',
                   source=country_cds, 
                   line_color=colors[i], 
                   line_width=2,
                   muted_color = colors[i],
-                  muted_alpha = 0.2,
-                  legend = departures_list[i])
-    plot.legend.location = 'top_left'
+                  muted_alpha = 0.2)])
+    legend_tuple_list = list(zip(departures_list, line_list))
+    legend = Legend(items =legend_tuple_list, location = (0,-30))
+    plot.add_layout(legend, 'right')    
     plot.legend.click_policy = 'mute'
     plot.yaxis.axis_label = "Tourists ('000s)"
     plot.xaxis.axis_label = "Year"
     return plot 
 
 def make_expenditure_in_chart_cds(expenditure_in_list):
-    plot = figure(title="Top 15 Countries by Tourism Expenditure In Country - US$ M")
+    plot = figure(plot_width=900, title="Top 15 Countries by Tourism Expenditure In Country - US$ M")
+    line_list = []
     for i in range(len(expenditure_in_list)):
         country_cds = get_cds(expenditure_in_list[i])
-        plot.line(x='years', 
+        line_list.append([plot.line(x='years', 
                   y='expenditures_in',
                   source=country_cds, 
                   line_color=colors[i], 
                   line_width=2,
                   muted_color = colors[i],
-                  muted_alpha = 0.2,
-                  legend = expenditure_in_list[i])
-    plot.legend.location = 'top_left'
+                  muted_alpha = 0.2)])
+    legend_tuple_list = list(zip(expenditure_in_list, line_list))
+    legend = Legend(items =legend_tuple_list, location = (0,-30))
+    plot.add_layout(legend, 'right')
     plot.legend.click_policy = 'mute'
     plot.yaxis.axis_label = "US$ - M"
     plot.xaxis.axis_label = "Year"
     return plot
 
 def make_expenditure_out_chart_cds(expenditure_out_list):
-    plot = figure(title="Top 15 Countries by Tourism Expenditure In Other Country - US$ M")
+    plot = figure(plot_width=900, title="Top 15 Countries by Tourism Expenditure In Other Country - US$ M")
+    line_list = []
     for i in range(len(expenditure_out_list)):
         country_cds = get_cds(expenditure_out_list[i])
-        plot.line(x='years', 
+        line_list.append([plot.line(x='years', 
                   y='expenditures_out',
                   source=country_cds, 
                   line_color=colors[i], 
                   line_width=2,
                   muted_color = colors[i],
-                  muted_alpha = 0.2,
-                  legend = expenditure_out_list[i])
-    plot.legend.location = 'top_left'
+                  muted_alpha = 0.2)])
+    legend_tuple_list = list(zip(expenditure_out_list, line_list))
+    legend = Legend(items =legend_tuple_list, location = (0,-30))
+    plot.add_layout(legend, 'right')
     plot.legend.click_policy = 'mute'
     plot.yaxis.axis_label = "US$ - M"
     plot.xaxis.axis_label = "Year"
@@ -335,7 +343,7 @@ select_country = Select(title="Country:",
 select_country.on_change("value", select_country_handler)
 layout = gridplot([select_country], [plot_global, plot_global_2],
                   [plot_15_arrival, None], [plot_15_departure, None],
-                  [plot_15_expend_in, None],[plot_15_expend_out, None])
+                  [plot_15_expend_in, None],[plot_15_expend_out, None], )
 
 tab = Panel(child=layout, title='Country')
 tabs = Tabs(tabs=[tab])
